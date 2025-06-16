@@ -9,24 +9,26 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
-  body {
-    padding: 20px;
-  }
-  img {
+  .thumb-img {
     max-width: 100px;
     height: auto;
     border-radius: 6px;
+  }
+
+  header{
+    padding: 25px;    
   }
 </style>
 </head>
 <body>
 
-  <header>
-    <img src="https://upload.wikimedia.org/wikipedia/commons/f/fd/Royal_Enfield_logo_new.svg">
+  <header class="bg-dark d-flex justify-content-center">
+    <img width="50%" src="https://upload.wikimedia.org/wikipedia/commons/f/fd/Royal_Enfield_logo_new.svg">
   </header>
 
 <div class="container">
-  <h1 class="mb-4">Disponibilidade da Himalayan 450</h1>
+  <h1 class="mb-4 mt-4 text-center">Disponibilidade da Himalayan 450</h1>
+  <hr>
 
   <div id="loading" class="fw-bold">Carregando dados, aguarde...</div>
 
@@ -146,8 +148,8 @@
         <td>${row.storeName}</td>
         <td>${row.modelName}</td>
         <td>${row.price}</td>
-        <td><span class="badge bg-success">Disponível</span></td>
-        <td><img src="${row.thumbUrl}" alt="${row.modelName}" loading="lazy"></td>
+        <td><span class="badge bg-success p-2 w-100">Disponível</span></td>
+        <td><img class="thumb-img" src="${row.thumbUrl}" alt="${row.modelName}" loading="lazy"></td>
       `;
 
       tbody.appendChild(tr);
