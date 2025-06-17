@@ -5,46 +5,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Disponibilidade da Himalayan 450</title>
-
-  <!-- Bootstrap CSS CDN -->
+  <link rel="icon" type="image/png" href="/img/royal-enfield-logo.png" />
+  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <style>
-    #loadingOverlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: rgba(0, 0, 0, 0.6);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 1050;
-      /* acima do Bootstrap modal */
-      color: white;
-      font-weight: bold;
-      font-size: 1.2rem;
-    }
-
-    .spinner-border {
-      width: 3rem;
-      height: 3rem;
-      margin-bottom: 1rem;
-    }
-
-    header {
-      background-color: #000;
-      padding: 25px;
-      text-align: center;
-    }
-
-    header img {
-      max-width: 50%;
-      height: auto;
-    }
-  </style>
+  <link href="css/styles.css" rel="stylesheet">
 </head>
 
 <body>
@@ -109,150 +73,9 @@
     </div>
   </div>
 
-  <!-- Bootstrap JS Bundle CDN (Popper + JS) -->
+  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-  <script>
-    const UFs = ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"];
-    const productModelId = 2;
-
-    let allRowsData = [];
-
-    async function fetchStoresByUF(uf) {
-      const url = `https://reservaroyal-site-sale-api.aatb.com.br/Store/${uf}`;
-      try {
-        const res = await fetch(url);
-        if (!res.ok) return [];
-        return await res.json();
-      } catch {
-        return [];
-      }
-    }
-
-    async function fetchProductTypes(storeId) {
-      const url = `https://reservaroyal-site-sale-api.aatb.com.br/Product/model/${productModelId}/types?storeId=${storeId}`;
-      try {
-        const res = await fetch(url);
-        if (!res.ok) return [];
-        const data = await res.json();
-        return data.filter(p => p.available === true);
-      } catch {
-        return [];
-      }
-    }
-
-    function populateSelectOptions(id, values) {
-      const select = document.getElementById(id);
-      while (select.options.length > 1) {
-        select.remove(1);
-      }
-      [...new Set(values.sort())].forEach(value => {
-        const option = document.createElement("option");
-        option.value = value;
-        option.textContent = value;
-        select.appendChild(option);
-      });
-    }
-
-    function filterTable() {
-      const ufFilter = document.getElementById("filterUf").value;
-      const cityFilter = document.getElementById("filterCity").value;
-      const storeFilter = document.getElementById("filterStore").value;
-      const modelFilter = document.getElementById("filterModel").value;
-
-      const tbody = document.querySelector("#productTable tbody");
-      tbody.innerHTML = "";
-
-      const filteredRows = allRowsData.filter(row => {
-        return (!ufFilter || row.uf === ufFilter)
-          && (!cityFilter || row.city === cityFilter)
-          && (!storeFilter || row.storeName === storeFilter)
-          && (!modelFilter || row.modelName === modelFilter);
-      });
-
-      for (const row of filteredRows) {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-        <td>${row.uf}</td>
-        <td>${row.city}</td>
-        <td>${row.storeName}</td>
-        <td>${row.modelName}</td>
-        <td>${row.price}</td>
-        <td><span class="badge bg-success p-2 w-100">Disponível</span></td>
-        <td><img class="thumb-img" src="${row.thumbUrl}" alt="${row.modelName}" loading="lazy"></td>
-      `;
-        tbody.appendChild(tr);
-      }
-
-      if (filteredRows.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Nenhum resultado encontrado</td></tr>';
-      }
-    }
-
-    async function main() {
-      const allStores = [];
-
-      for (const uf of UFs) {
-        const stores = await fetchStoresByUF(uf);
-        allStores.push(...stores);
-      }
-
-      for (const store of allStores) {
-        const products = await fetchProductTypes(store.storeId);
-        for (const product of products) {
-          allRowsData.push({
-            uf: store.uf,
-            city: store.city,
-            storeName: store.name,
-            modelName: product.name,
-            price: product.price,
-            thumbUrl: product.thumbUrl
-          });
-        }
-      }
-
-      // Após carregar todos os dados e popular os demais selects:
-      populateSelectOptions("filterUf", allRowsData.map(r => r.uf));
-
-      // Popula o select de modelos **com todos os modelos disponíveis, sem filtro**
-      populateSelectOptions("filterModel", allRowsData.map(r => r.modelName));
-
-      document.getElementById("loadingOverlay").style.display = "none";
-      document.getElementById("filters").style.display = "flex";
-      document.getElementById("tableContainer").style.display = "block";
-
-      document.getElementById("filterUf").addEventListener("change", () => {
-        const uf = document.getElementById("filterUf").value;
-        const cities = allRowsData.filter(r => r.uf === uf).map(r => r.city);
-        populateSelectOptions("filterCity", cities);
-        populateSelectOptions("filterStore", []);
-        // NÃO ALTERAR MAIS O SELECT MODELO AQUI
-        filterTable();
-      });
-
-      document.getElementById("filterCity").addEventListener("change", () => {
-        const uf = document.getElementById("filterUf").value;
-        const city = document.getElementById("filterCity").value;
-        const stores = allRowsData.filter(r => r.uf === uf && r.city === city).map(r => r.storeName);
-        populateSelectOptions("filterStore", stores);
-        // NÃO ALTERAR MAIS O SELECT MODELO AQUI
-        filterTable();
-      });
-
-      document.getElementById("filterStore").addEventListener("change", () => {
-        // Apenas filtra tabela, sem mudar modelos
-        filterTable();
-      });
-
-      document.getElementById("filterModel").addEventListener("change", filterTable);
-
-      filterTable();
-    }
-
-    main();
-  </script>
-
-
+  <script src="js/main.js"></script>
 </body>
 
 </html>
